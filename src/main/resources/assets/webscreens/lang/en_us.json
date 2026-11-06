@@ -1,3 +1,6 @@
 {
-	"item.webscreens.screen_placer": "Screen Placer"
+	"item.webscreens.screen_placer": "Screen Placer",
+	"key.webscreens.menu": "Open Web Screens menu",
+	"key.webscreens.settings": "Settings of the screen you look at",
+	"key.categories.webscreens": "Web Screens"
 }
