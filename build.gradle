@@ -4,6 +4,15 @@ plugins {
 }
 
 repositories {
+	// Mod Menu: only used so the mod can add a "Configure" button there.
+	maven {
+		name = "Terraformers"
+		url = "https://maven.terraformersmc.com/"
+		metadataSources {
+			mavenPom()
+			artifact()
+		}
+	}
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
@@ -30,6 +39,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Optional at runtime: the mod works without Mod Menu. It is a client-only mod, so with split
+	// source sets it has to go on the client source set.
+	modClientImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
