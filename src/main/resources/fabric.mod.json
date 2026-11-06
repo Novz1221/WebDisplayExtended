@@ -16,6 +16,9 @@
 		],
 		"client": [
 			"com.webscreens.client.WebScreensClient"
+		],
+		"modmenu": [
+			"com.webscreens.client.ModMenuIntegration"
 		]
 	},
 	"depends": {
