@@ -66,6 +66,9 @@ final class PlacementTool {
 		s.minZ = Math.min(firstPos.getZ(), pos.getZ());
 		s.maxZ = Math.max(firstPos.getZ(), pos.getZ());
 		s.face = face.getName();
+		s.pxPerBlock = ClientConfig.defaultPx;
+		s.fps = ClientConfig.defaultFps;
+		s.dpi = ClientConfig.defaultDpi;
 		s.owner = mc.player.getUUID().toString();
 		s.ownerName = mc.player.getGameProfile().getName();
 		firstPos = null;

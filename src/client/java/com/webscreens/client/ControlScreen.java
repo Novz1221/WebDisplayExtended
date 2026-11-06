@@ -19,6 +19,7 @@ final class ControlScreen extends Screen {
 
 	@Override
 	protected void init() {
+		browser.setPinned(true);
 		browser.setFocus(true);
 	}
 
@@ -29,6 +30,7 @@ final class ControlScreen extends Screen {
 
 	@Override
 	public void onClose() {
+		browser.setPinned(false);
 		browser.setFocus(false);
 		super.onClose();
 	}

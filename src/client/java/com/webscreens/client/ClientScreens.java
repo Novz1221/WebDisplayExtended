@@ -27,9 +27,9 @@ import java.util.Set;
 final class ClientScreens {
 	private ClientScreens() { }
 
-	private static final double EPS = 0.002;
-	private static final double CREATE_DIST = 48;
-	private static final double DESTROY_DIST = 64;
+	private static final double EPS = 0.01; // gap to the wall: smaller values z-fight on mobile GPUs
+	private static double createDist() { return ClientConfig.viewDistance; }
+	private static double destroyDist() { return ClientConfig.viewDistance + 16; }
 
 	static List<ScreenData> screens = new ArrayList<>();
 	private static final Map<String, BridgeBrowser> BROWSERS = new HashMap<>();
@@ -67,6 +67,26 @@ final class ClientScreens {
 		screens = new ArrayList<>();
 	}
 
+	/** The closest screen within 8 blocks of the player, or null. */
+	static ScreenData nearest() {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null || mc.level == null) return null;
+		String dim = mc.level.dimension().location().toString();
+		Vec3 me = mc.player.position();
+		ScreenData best = null;
+		double bestD = 8 * 8;
+		for (ScreenData s : screens) {
+			if (!s.dim.equals(dim)) continue;
+			double cx = (s.minX + s.maxX + 1) / 2.0, cy = (s.minY + s.maxY + 1) / 2.0, cz = (s.minZ + s.maxZ + 1) / 2.0;
+			double d2 = me.distanceToSqr(cx, cy, cz);
+			if (d2 < bestD) {
+				bestD = d2;
+				best = s;
+			}
+		}
+		return best;
+	}
+
 	static BridgeBrowser browserOf(ScreenData s) {
 		return BROWSERS.get(s.id);
 	}
@@ -92,8 +112,8 @@ final class ClientScreens {
 			double d2 = me.distanceToSqr(cx, cy, cz);
 			BridgeBrowser b = BROWSERS.get(s.id);
 			if (b == null) {
-				if (d2 < CREATE_DIST * CREATE_DIST || s.alwaysActive) BROWSERS.put(s.id, new BridgeBrowser(s));
-			} else if (d2 > DESTROY_DIST * DESTROY_DIST && !s.alwaysActive) {
+				if (d2 < createDist() * createDist() || s.alwaysActive) BROWSERS.put(s.id, new BridgeBrowser(s));
+			} else if (d2 > destroyDist() * destroyDist() && !s.alwaysActive) {
 				b.close();
 				BROWSERS.remove(s.id);
 			} else {
@@ -117,6 +137,9 @@ final class ClientScreens {
 			if (!s.dim.equals(dim)) continue;
 			BridgeBrowser b = BROWSERS.get(s.id);
 			if (b == null) continue;
+			boolean visible = isVisible(s, cam, camera);
+			b.setActive(visible);
+			if (!visible) continue; // not in front of the camera: no texture upload, no drawing
 			ResourceLocation tex = b.texture();
 			if (tex == null) continue;
 
@@ -128,6 +151,23 @@ final class ClientScreens {
 			stack.popPose();
 			if (consumers instanceof MultiBufferSource.BufferSource bs) bs.endBatch(type);
 		}
+	}
+
+	/** Cheap visibility test: in front of the camera (allowing for the screen's size) and on the open side of the wall. */
+	private static boolean isVisible(ScreenData s, Vec3 cam, Camera camera) {
+		double cx = (s.minX + s.maxX + 1) / 2.0, cy = (s.minY + s.maxY + 1) / 2.0, cz = (s.minZ + s.maxZ + 1) / 2.0;
+		double dx = cx - cam.x, dy = cy - cam.y, dz = cz - cam.z;
+		double radius = 0.5 * Math.sqrt(s.blocksW() * (double) s.blocksW() + s.blocksH() * (double) s.blocksH()) + 1;
+		org.joml.Vector3f look = camera.getLookVector();
+		double along = dx * look.x() + dy * look.y() + dz * look.z();
+		if (along < -radius) return false;
+		if (dx * dx + dy * dy + dz * dz > destroyDist() * destroyDist()) return false;
+		// Behind the wall the screen is hidden by the wall itself.
+		Direction d = s.dir();
+		double plane = d.getAxis() == Direction.Axis.Z
+				? (d.getStepZ() > 0 ? s.maxZ + 1 : s.minZ) : (d.getStepX() > 0 ? s.maxX + 1 : s.minX);
+		double camSide = d.getAxis() == Direction.Axis.Z ? (cam.z - plane) * d.getStepZ() : (cam.x - plane) * d.getStepX();
+		return camSide > -0.5;
 	}
 
 	private static void drawQuad(PoseStack stack, VertexConsumer vc, ScreenData s, double browserAspect) {

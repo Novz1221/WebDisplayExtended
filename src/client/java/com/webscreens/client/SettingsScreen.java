@@ -18,9 +18,21 @@ final class SettingsScreen extends Screen {
 	private EditBox urlBox;
 	private VolumeSlider volume;
 
+	private final Screen parent;
+
 	SettingsScreen(ScreenData original) {
+		this(original, null);
+	}
+
+	SettingsScreen(ScreenData original, Screen parent) {
 		super(Component.literal("Screen settings"));
 		this.data = ScreenData.fromJson(original.toJson());
+		this.parent = parent;
+	}
+
+	@Override
+	public void onClose() {
+		minecraft.setScreen(parent);
 	}
 
 	private static int next(int[] values, int current) {

@@ -11,6 +11,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,6 +28,8 @@ final class BridgeBrowser {
 	private int fps, dpi;
 	private boolean created;
 	private boolean closed;
+	private boolean active = true;   // false while the screen is out of sight: capture slows down to save battery
+	private boolean pinned;          // true while the full-screen control view is open
 
 	private volatile long frameSeq;
 	private volatile int frameW, frameH;
@@ -62,18 +65,23 @@ final class BridgeBrowser {
 			o.writeInt(w);
 			o.writeInt(h);
 		});
+		BridgeClient.send('B', o -> {
+			o.writeInt(id);
+			o.writeBoolean(true);
+		});
 		sendQuality();
 		sendDpi();
 	}
 
 	void onDisconnected() {
 		created = false;
+		active = true;
 		framePath = null;
 		uploadedSeq = -1;
 	}
 
 	private void sendQuality() {
-		final int f = fps;
+		final int f = (active || pinned) ? fps : 2;
 		BridgeClient.send('P', o -> {
 			o.writeInt(id);
 			o.writeInt(f);
@@ -122,6 +130,18 @@ final class BridgeBrowser {
 		}
 	}
 
+	/** Called every frame by the renderer: lowers the capture rate of screens nobody is looking at. */
+	void setActive(boolean visible) {
+		if (visible == active) return;
+		active = visible;
+		if (created) sendQuality();
+	}
+
+	void setPinned(boolean p) {
+		pinned = p;
+		if (created) sendQuality();
+	}
+
 	void setVolume(int volume) {
 		if (!created) return;
 		final String js = "document.querySelectorAll('video,audio').forEach(function(e){e.volume=" + (volume / 100.0) + "});";
@@ -151,10 +171,16 @@ final class BridgeBrowser {
 				try (RandomAccessFile raf = new RandomAccessFile(path, "r")) {
 					map = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, raf.length());
 				}
+				map.order(ByteOrder.LITTLE_ENDIAN);
 				mappedPath = path;
 			}
 			long bytes = (long) fw * fh * 4;
-			if (HEADER + bytes > map.capacity()) return tex == null ? null : texId;
+			// The launcher alternates between two slots (header word at offset 12 = number of slots): read the one
+			// that is complete, so a frame is never half old, half new.
+			int slots = map.getInt(12);
+			int slot = slots == 2 ? (int) (seq & 1) : 0;
+			long offset = HEADER + slot * bytes;
+			if (offset + bytes > map.capacity()) return tex == null ? null : texId;
 
 			if (tex == null || texW != fw || texH != fh) {
 				releaseTexture();
@@ -162,6 +188,7 @@ final class BridgeBrowser {
 				final int gen = ++generation;
 				tex = new DynamicTexture(() -> "webscreens/" + id + "/" + gen, image);
 				texId = WebScreensMod.id("screen/" + id + "/" + gen);
+				tex.setFilter(true, false); // smooth scaling: nearest sampling shimmers when the screen moves
 				Minecraft.getInstance().getTextureManager().register(texId, tex);
 				texW = fw;
 				texH = fh;
@@ -170,7 +197,7 @@ final class BridgeBrowser {
 			if (img != null) {
 				// The bridge writes RGBA bytes, which is exactly NativeImage's RGBA layout: one straight copy.
 				ByteBuffer src = map;
-				MemoryUtil.memCopy(MemoryUtil.memAddress(src, HEADER), img.getPointer(), bytes);
+				MemoryUtil.memCopy(MemoryUtil.memAddress(src, (int) offset), img.getPointer(), bytes);
 				tex.upload();
 				uploadedSeq = seq;
 			}
