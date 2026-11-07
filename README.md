@@ -1,5 +1,6 @@
 # Web Screens
 Ai Mod Generated
+
 A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered through the **Android WebView** hosted by the launcher (the `webbridge.dex` bridge). It is built to be used on a phone (Mojo launcher and similar), not on a PC.
 
 > **Status: experimental.** It was built and tested step by step on a phone. Some parts (see [Limitations](#limitations)) are not finished yet.
