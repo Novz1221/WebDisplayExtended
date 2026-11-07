@@ -60,7 +60,7 @@ public class ScreenData {
 		adBlock = in.adBlock;
 		pxPerBlock = Math.max(64, Math.min(768, in.pxPerBlock));
 		fps = Math.max(1, Math.min(60, in.fps));
-		dpi = Math.max(48, Math.min(300, in.dpi));
+		dpi = Math.max(24, Math.min(768, in.dpi));
 	}
 
 	public String toJson() {
