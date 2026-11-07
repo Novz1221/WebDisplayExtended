@@ -21,10 +21,10 @@ A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered th
 
 | Component | Notes |
 |---|---|
-| Minecraft | 1.21.8 |
+| Minecraft | 1.21.6-1.21.8 |
 | Loader | Fabric Loader 0.16.0 or newer |
 | Java | 21 |
-| Fabric API | 0.136.1+1.21.8 (or the matching build for 1.21.8) |
+| Fabric API | 0.136.1+ |
 | Launcher | An Android launcher with the **WebView bridge** (`webbridge.dex`) installed |
 | Mod Menu | Optional (adds a Configure button) |
 
@@ -32,7 +32,7 @@ Without the bridge the mod still loads, but screens only show "Waiting for the A
 
 ## Installation
 
-1. Install Fabric Loader and **Fabric API** for 1.21.8.
+1. Install Fabric Loader and **Fabric API**.
 2. Put `webscreens-<version>.jar` (the one **without** the `-sources` suffix) in the `mods` folder.
 3. Make sure the launcher uses the latest `webbridge.dex` (built from the bridge repository).
 4. Start the game.
