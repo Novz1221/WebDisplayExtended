@@ -25,12 +25,12 @@ A Fabric mod for Minecraft **1.21.6-1.21.8** that shows web pages on walls, rend
 | Loader | Fabric Loader 0.16.0 or newer |
 | Java | 21 |
 | Fabric API | 0.136.1+ |
-| Launcher | MJ Extended with **WebView bridge** (`webbridge.dex`) installed. Other Launcher Soon |
+| Launcher | MJ Extended with **WebView** (`webbridge.dex`) installed. Other Launcher Soon |
 | Mod Menu | Optional (adds a Configure button) |
 
 Download Launcher  [Whatsapp Update](https://whatsapp.com/channel/0029Vb9d0rgFSAtB0FOyql1m).
 
-Without the WebView bridge the mod still loads, but screens only show "Waiting for the Android WebView bridge...".
+Without the WebView the mod still loads, but screens only show "Waiting for the Android WebView ...".
 
 ## Installation
 
