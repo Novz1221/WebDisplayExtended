@@ -1,7 +1,7 @@
 # Web Screens
 Ai Mod Generated btw
 
-A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered through the **Android WebView** hosted by the launcher (the `webbridge.dex` bridge). It is built to be used on a phone (Mojo launcher and similar), not on a PC.
+A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered through the **Android WebView** hosted by the launcher (the `webbridge.dex` bridge). It is built to be used on a phone , not on a PC.
 
 > **Status: experimental.** It was built and tested step by step on a phone. Some parts (see [Limitations](#limitations)) are not finished yet.
 
@@ -25,10 +25,10 @@ A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered th
 | Loader | Fabric Loader 0.16.0 or newer |
 | Java | 21 |
 | Fabric API | 0.136.1+ |
-| Launcher | An Android launcher with the **WebView bridge** (`webbridge.dex`) installed |
+| Launcher | MJ Extended with **WebView bridge** (`webbridge.dex`) installed Other Launcher Soon |
 | Mod Menu | Optional (adds a Configure button) |
 
-Without the bridge the mod still loads, but screens only show "Waiting for the Android WebView bridge...".
+Without the WebView bridge the mod still loads, but screens only show "Waiting for the Android WebView bridge...".
 
 ## Installation
 
@@ -127,13 +127,11 @@ Local build: `./gradlew build` (JDK 21 or newer). The result is in `build/libs`.
 
 | Problem | Try |
 |---|---|
-| The screen only shows "Waiting for the Android WebView bridge..." | The launcher has not loaded `webbridge.dex`, or it is an old version. Install the latest dex. |
 | The screen flickers or stutters | Lower the resolution or FPS in the screen settings. Run `/webscreens stats` while looking at the screen. |
-| Video is black | Make sure the latest dex is installed (hardware capture path for video). |
 | Cannot create a screen on a server | Server without the mod: use `/webscreens place`. Server with the mod: use the Screen Placer item. |
-| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen`. |
+| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen Still not Working`. |
 
-When reporting a problem, include `latest.log` (the lines containing `WebScreens` or `bridge`) and the output of `/webscreens stats`.
+When reporting a problem, include `latest.log` (the lines containing `WebScreens`) and the output of `/webscreens stats`.
 
 ## Limitations
 
