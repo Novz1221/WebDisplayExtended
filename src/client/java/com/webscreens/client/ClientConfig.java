@@ -37,7 +37,7 @@ final class ClientConfig {
 			if (d == null) return;
 			defaultPx = Math.max(64, Math.min(768, d.defaultPx));
 			defaultFps = Math.max(1, Math.min(60, d.defaultFps));
-			defaultDpi = Math.max(48, Math.min(300, d.defaultDpi));
+			defaultDpi = Math.max(24, Math.min(768, d.defaultDpi));
 			viewDistance = Math.max(16, Math.min(128, d.viewDistance));
 		} catch (Exception e) {
 			WebScreensMod.LOGGER.warn("Could not read webscreens-client.json: {}", e.toString());

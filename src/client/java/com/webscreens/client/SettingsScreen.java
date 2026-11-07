@@ -12,11 +12,12 @@ import net.minecraft.network.chat.Component;
 final class SettingsScreen extends Screen {
 	private static final int[] RESOLUTIONS = {64, 128, 192, 256, 384, 512, 768};
 	private static final int[] FPS = {5, 10, 15, 20, 30, 45, 60};
-	private static final int[] DPI = {48, 72, 96, 120, 144, 192, 240, 300};
 
 	private final ScreenData data; // working copy
 	private EditBox urlBox;
 	private VolumeSlider volume;
+	private EditBox dpiBox;
+	private int dpiRowY;
 
 	private final Screen parent;
 
@@ -81,10 +82,13 @@ final class SettingsScreen extends Screen {
 		}).bounds(xr, y, half, 20).build());
 
 		y += 24;
-		addRenderableWidget(Button.builder(dpiLabel(), b -> {
-			data.dpi = next(DPI, data.dpi);
-			b.setMessage(dpiLabel());
-		}).bounds(x, y, w, 20).build());
+		dpiRowY = y;
+		dpiBox = new EditBox(font, x + 60, y, w - 60, 20, Component.literal("DPI"));
+		dpiBox.setMaxLength(3);
+		dpiBox.setFilter(t -> t.matches("\\d{0,3}"));
+		dpiBox.setValue(String.valueOf(data.dpi));
+		dpiBox.setHint(Component.literal("96 = normal"));
+		addRenderableWidget(dpiBox);
 
 		y += 32;
 		addRenderableWidget(Button.builder(Component.literal("Destroy screen"), b -> {
@@ -95,6 +99,7 @@ final class SettingsScreen extends Screen {
 		addRenderableWidget(Button.builder(Component.literal("Apply"), b -> {
 			data.url = urlBox.getValue();
 			data.volume = volume.volume();
+			data.dpi = parseDpi(dpiBox.getValue(), data.dpi);
 			ScreenActions.apply(data);
 			onClose();
 		}).bounds(x, y, w, 20).build());
@@ -120,8 +125,13 @@ final class SettingsScreen extends Screen {
 		return Component.literal("FPS: " + data.fps);
 	}
 
-	private Component dpiLabel() {
-		return Component.literal("DPI: " + data.dpi + " (" + Math.round(data.dpi * 100f / 96f) + " %)");
+	/** Any whole number from 24 to 768; 96 is a normal page, higher makes everything bigger. */
+	private static int parseDpi(String text, int fallback) {
+		try {
+			return Math.max(24, Math.min(768, Integer.parseInt(text.trim())));
+		} catch (NumberFormatException e) {
+			return fallback;
+		}
 	}
 
 	@Override
@@ -130,6 +140,7 @@ final class SettingsScreen extends Screen {
 		int y = Math.max(20, height / 2 - 100);
 		g.drawCenteredString(font, title, width / 2, y - 14, 0xFFFFFFFF);
 		g.drawString(font, "Address (URL)", width / 2 - 150, y + 2, 0xFFAAAAAA);
+		g.drawString(font, "DPI", width / 2 - 150, dpiRowY + 6, 0xFFFFFFFF);
 	}
 
 	private static final class VolumeSlider extends AbstractSliderButton {

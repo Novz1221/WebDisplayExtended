@@ -89,6 +89,18 @@ public class WebScreensClient implements ClientModInitializer {
 							}
 							return Command.SINGLE_SUCCESS;
 						}))
+						.then(ClientCommandManager.literal("fullscreen").executes(ctx -> {
+							Minecraft mc = Minecraft.getInstance();
+							ScreenData s = lookedAtScreen(mc);
+							if (s == null) s = ClientScreens.nearest();
+							BridgeBrowser b = s == null ? null : ClientScreens.browserOf(s);
+							if (b == null) {
+								ctx.getSource().sendFeedback(Component.literal("No active screen nearby."));
+							} else {
+								b.toggleVideoFullscreen();
+							}
+							return Command.SINGLE_SUCCESS;
+						}))
 						.then(ClientCommandManager.literal("stats").executes(ctx -> {
 							Minecraft mc = Minecraft.getInstance();
 							ScreenData s = lookedAtScreen(mc);
@@ -117,6 +129,7 @@ public class WebScreensClient implements ClientModInitializer {
 						.executes(ctx -> {
 							ctx.getSource().sendFeedback(Component.literal("/webscreens place - create a screen (servers without the mod)"));
 							ctx.getSource().sendFeedback(Component.literal("/webscreens settings - settings of the screen you are looking at"));
+							ctx.getSource().sendFeedback(Component.literal("/webscreens fullscreen - video of the screen you look at fills the screen (again to undo)"));
 							ctx.getSource().sendFeedback(Component.literal("/webscreens stats - capture and upload rate of the screen you look at"));
 							ctx.getSource().sendFeedback(Component.literal("/webscreens menu - all screens and defaults (also the K key, or Mod Menu > Web Screens)"));
 							return Command.SINGLE_SUCCESS;

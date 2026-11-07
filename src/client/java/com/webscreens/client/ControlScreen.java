@@ -1,6 +1,7 @@
 package com.webscreens.client;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -21,6 +22,14 @@ final class ControlScreen extends Screen {
 	protected void init() {
 		browser.setPinned(true);
 		browser.setFocus(true);
+		// Works even when a site's own fullscreen button does not: the video fills the whole browser area.
+		addRenderableWidget(Button.builder(Component.literal("Video full"), b -> browser.toggleVideoFullscreen())
+				.bounds(width - 64, 4, 60, 16).build());
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
+		// no dimming or blur: the page is drawn full screen in render()
 	}
 
 	@Override
@@ -65,6 +74,7 @@ final class ControlScreen extends Screen {
 		} else {
 			g.drawCenteredString(font, Component.literal("Waiting for the Android WebView bridge..."), width / 2, height / 2, 0xFFFFFFFF);
 		}
+		super.render(g, mouseX, mouseY, delta); // draws the button on top
 	}
 
 	/** GLFW buttons are 0 left, 1 right, 2 middle; the bridge wants 0 left, 1 middle, 2 right. */
@@ -74,6 +84,7 @@ final class ControlScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double mx, double my, int button) {
+		if (super.mouseClicked(mx, my, button)) return true; // the Video full button
 		browser.mouse(1, bx(mx), by(my), bridgeButton(button));
 		return true;
 	}

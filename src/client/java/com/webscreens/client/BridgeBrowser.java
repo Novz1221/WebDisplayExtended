@@ -169,6 +169,16 @@ final class BridgeBrowser {
 		if (created) sendQuality();
 	}
 
+	/** Makes the video on the page fill the whole browser area (or puts it back). Works on any site with a <video>. */
+	void toggleVideoFullscreen() {
+		if (!created) return;
+		final String js = "window.__mjToggleFs&&window.__mjToggleFs();";
+		BridgeClient.send('J', o -> {
+			o.writeInt(id);
+			BridgeClient.writeStr(o, js);
+		});
+	}
+
 	void setVolume(int volume) {
 		if (!created) return;
 		final String js = "document.querySelectorAll('video,audio').forEach(function(e){e.volume=" + (volume / 100.0) + "});";
