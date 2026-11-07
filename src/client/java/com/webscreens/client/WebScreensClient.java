@@ -89,6 +89,15 @@ public class WebScreensClient implements ClientModInitializer {
 							}
 							return Command.SINGLE_SUCCESS;
 						}))
+						.then(ClientCommandManager.literal("stats").executes(ctx -> {
+							Minecraft mc = Minecraft.getInstance();
+							ScreenData s = lookedAtScreen(mc);
+							if (s == null) s = ClientScreens.nearest();
+							BridgeBrowser b = s == null ? null : ClientScreens.browserOf(s);
+							ctx.getSource().sendFeedback(Component.literal(b == null
+									? "No active screen nearby." : b.stats()));
+							return Command.SINGLE_SUCCESS;
+						}))
 						.then(ClientCommandManager.literal("menu").executes(ctx -> {
 							pendingOpen = () -> new ManagerScreen(null);
 							return Command.SINGLE_SUCCESS;
@@ -108,6 +117,7 @@ public class WebScreensClient implements ClientModInitializer {
 						.executes(ctx -> {
 							ctx.getSource().sendFeedback(Component.literal("/webscreens place - create a screen (servers without the mod)"));
 							ctx.getSource().sendFeedback(Component.literal("/webscreens settings - settings of the screen you are looking at"));
+							ctx.getSource().sendFeedback(Component.literal("/webscreens stats - capture and upload rate of the screen you look at"));
 							ctx.getSource().sendFeedback(Component.literal("/webscreens menu - all screens and defaults (also the K key, or Mod Menu > Web Screens)"));
 							return Command.SINGLE_SUCCESS;
 						})));

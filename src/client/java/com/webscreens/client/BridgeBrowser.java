@@ -30,6 +30,14 @@ final class BridgeBrowser {
 	private boolean closed;
 	private boolean active = true;   // false while the screen is out of sight: capture slows down to save battery
 	private boolean pinned;          // true while the full-screen control view is open
+	private int lodPct = 100;        // capture scale chosen from the distance (the page layout is not affected)
+	private long lodChangedAt;
+
+	// statistics for /webscreens stats
+	private long recvCount, recvStart = System.nanoTime();
+	private volatile double recvFps;
+	private long upCount, upStart = System.nanoTime();
+	private double upFps;
 
 	private volatile long frameSeq;
 	private volatile int frameW, frameH;
@@ -82,10 +90,11 @@ final class BridgeBrowser {
 
 	private void sendQuality() {
 		final int f = (active || pinned) ? fps : 2;
+		final int pct = pinned ? 100 : lodPct;
 		BridgeClient.send('P', o -> {
 			o.writeInt(id);
 			o.writeInt(f);
-			o.writeInt(100);
+			o.writeInt(pct);
 			o.writeInt(0);
 			o.writeInt(0);
 		});
@@ -137,6 +146,24 @@ final class BridgeBrowser {
 		if (created) sendQuality();
 	}
 
+	/**
+	 * Distance-based level of detail: far screens are captured at a smaller scale so the texture matches what
+	 * is actually visible (less shimmering, less work). Changes are rate limited to avoid constant buffer swaps.
+	 */
+	void setLod(int pct) {
+		if (pct == lodPct) return;
+		long now = System.currentTimeMillis();
+		if (now - lodChangedAt < 750) return;
+		lodChangedAt = now;
+		lodPct = pct;
+		if (created) sendQuality();
+	}
+
+	String stats() {
+		return String.format("capture %.1f fps in, %.1f fps uploaded | texture %dx%d | page %dx%d | scale %d%% | limit %d fps%s",
+				recvFps, upFps, texW, texH, reqW, reqH, pinned ? 100 : lodPct, fps, created ? "" : " | NOT CONNECTED");
+	}
+
 	void setPinned(boolean p) {
 		pinned = p;
 		if (created) sendQuality();
@@ -156,6 +183,13 @@ final class BridgeBrowser {
 		frameH = h;
 		framePath = path;
 		frameSeq = seq;
+		recvCount++;
+		long now = System.nanoTime();
+		if (now - recvStart >= 1_000_000_000L) {
+			recvFps = recvCount * 1e9 / (now - recvStart);
+			recvCount = 0;
+			recvStart = now;
+		}
 	}
 
 	/** Texture with the latest frame (render thread only), or null until the first frame arrived. */
@@ -200,6 +234,13 @@ final class BridgeBrowser {
 				MemoryUtil.memCopy(MemoryUtil.memAddress(src, (int) offset), img.getPointer(), bytes);
 				tex.upload();
 				uploadedSeq = seq;
+				upCount++;
+				long nowNs = System.nanoTime();
+				if (nowNs - upStart >= 1_000_000_000L) {
+					upFps = upCount * 1e9 / (nowNs - upStart);
+					upCount = 0;
+					upStart = nowNs;
+				}
 			}
 		} catch (IOException | RuntimeException e) {
 			WebScreensMod.LOGGER.warn("Frame upload failed: {}", e.toString());

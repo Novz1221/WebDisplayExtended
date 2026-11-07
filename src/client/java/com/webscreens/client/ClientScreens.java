@@ -143,11 +143,22 @@ final class ClientScreens {
 			ResourceLocation tex = b.texture();
 			if (tex == null) continue;
 
+			// Distance based extras: capture scale (level of detail) and the gap to the wall (depth precision).
+			double cx = (s.minX + s.maxX + 1) / 2.0, cy = (s.minY + s.maxY + 1) / 2.0, cz = (s.minZ + s.maxZ + 1) / 2.0;
+			double dist = cam.distanceTo(new Vec3(cx, cy, cz));
+			double radius = 0.5 * Math.hypot(s.blocksW(), s.blocksH());
+			double nearest = Math.max(1.0, dist - radius * 0.5);
+			double fov = Math.toRadians(mc.options.fov().get());
+			double pxPerBlockOnScreen = mc.getWindow().getHeight() / (2.0 * Math.tan(fov / 2.0) * nearest);
+			double want = 1.3 * pxPerBlockOnScreen / s.pxPerBlock;
+			b.setLod(want >= 0.85 ? 100 : want >= 0.6 ? 70 : want >= 0.42 ? 50 : want >= 0.3 ? 35 : 25);
+			double eps = Math.min(0.2, EPS + 0.0035 * dist);
+
 			RenderType type = RenderType.entityCutoutNoCull(tex);
 			VertexConsumer vc = consumers.getBuffer(type);
 			stack.pushPose();
 			stack.translate(-cam.x, -cam.y, -cam.z);
-			drawQuad(stack, vc, s, b.reqW / (double) b.reqH);
+			drawQuad(stack, vc, s, b.reqW / (double) b.reqH, eps);
 			stack.popPose();
 			if (consumers instanceof MultiBufferSource.BufferSource bs) bs.endBatch(type);
 		}
@@ -170,7 +181,7 @@ final class ClientScreens {
 		return camSide > -0.5;
 	}
 
-	private static void drawQuad(PoseStack stack, VertexConsumer vc, ScreenData s, double browserAspect) {
+	private static void drawQuad(PoseStack stack, VertexConsumer vc, ScreenData s, double browserAspect, double eps) {
 		Direction d = s.dir();
 		boolean zFace = d.getAxis() == Direction.Axis.Z;
 		// The viewer's right-hand side, looking at the face from outside, is the counter-clockwise neighbour.
@@ -197,8 +208,8 @@ final class ClientScreens {
 		}
 
 		double plane;
-		if (zFace) plane = d.getStepZ() > 0 ? s.maxZ + 1 + EPS : s.minZ - EPS;
-		else plane = d.getStepX() > 0 ? s.maxX + 1 + EPS : s.minX - EPS;
+		if (zFace) plane = d.getStepZ() > 0 ? s.maxZ + 1 + eps : s.minZ - eps;
+		else plane = d.getStepX() > 0 ? s.maxX + 1 + eps : s.minX - eps;
 
 		PoseStack.Pose pose = stack.last();
 		float nx = d.getStepX(), nz = d.getStepZ();
