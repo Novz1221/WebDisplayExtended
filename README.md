@@ -25,7 +25,7 @@ A Fabric mod for Minecraft **1.21.8** that shows web pages on walls, rendered th
 | Loader | Fabric Loader 0.16.0 or newer |
 | Java | 21 |
 | Fabric API | 0.136.1+ |
-| Launcher | MJ Extended with **WebView bridge** (`webbridge.dex`) installed Other Launcher Soon |
+| Launcher | MJ Extended with **WebView bridge** (`webbridge.dex`) installed. Other Launcher Soon |
 | Mod Menu | Optional (adds a Configure button) |
 
 Without the WebView bridge the mod still loads, but screens only show "Waiting for the Android WebView bridge...".
@@ -129,7 +129,7 @@ Local build: `./gradlew build` (JDK 21 or newer). The result is in `build/libs`.
 |---|---|
 | The screen flickers or stutters | Lower the resolution or FPS in the screen settings. Run `/webscreens stats` while looking at the screen. |
 | Cannot create a screen on a server | Server without the mod: use `/webscreens place`. Server with the mod: use the Screen Placer item. |
-| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen Still not Working`. |
+| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen `. This Feature Still Not Working |
 
 When reporting a problem, include `latest.log` (the lines containing `WebScreens`) and the output of `/webscreens stats`.
 
