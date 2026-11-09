@@ -241,7 +241,7 @@ final class BridgeBrowser {
 			if (img != null) {
 				// The bridge writes RGBA bytes, which is exactly NativeImage's RGBA layout: one straight copy.
 				ByteBuffer src = map;
-				MemoryUtil.memCopy(MemoryUtil.memAddress(src, (int) offset), img.getPointer(), bytes);
+				MemoryUtil.memCopy(MemoryUtil.memAddress(src, (int) offset), img.pixels, bytes);
 				tex.upload();
 				uploadedSeq = seq;
 				upCount++;
