@@ -3,7 +3,7 @@ package com.webscreens.client;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
@@ -70,7 +70,7 @@ final class ControlScreen extends Screen {
 		g.fill(0, 0, width, height, 0xFF000000);
 		ResourceLocation tex = browser.texture();
 		if (tex != null) {
-			g.blit(RenderPipelines.GUI_TEXTURED, tex, x0, y0, 0f, 0f, dw, dh, browser.reqW, browser.reqH, browser.reqW, browser.reqH);
+			g.blit(RenderType::guiTextured, tex, x0, y0, 0f, 0f, dw, dh, dw, dh);
 		} else {
 			g.drawCenteredString(font, Component.literal("Waiting for the Android WebView bridge..."), width / 2, height / 2, 0xFFFFFFFF);
 		}

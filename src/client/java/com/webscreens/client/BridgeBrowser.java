@@ -230,7 +230,7 @@ final class BridgeBrowser {
 				releaseTexture();
 				NativeImage image = new NativeImage(NativeImage.Format.RGBA, fw, fh, false);
 				final int gen = ++generation;
-				tex = new DynamicTexture(() -> "webscreens/" + id + "/" + gen, image);
+				tex = new DynamicTexture(image);
 				texId = WebScreensMod.id("screen/" + id + "/" + gen);
 				tex.setFilter(true, false); // smooth scaling: nearest sampling shimmers when the screen moves
 				Minecraft.getInstance().getTextureManager().register(texId, tex);
