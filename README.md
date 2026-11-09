@@ -1,7 +1,6 @@
 # Web Screens
-This Project Fully Ai Generated
 
-A Fabric mod for Minecraft **1.21.6-1.21.8** that shows web pages on walls, rendered through the **Android WebView** hosted by the launcher. It is built to be used on a phone , not on a PC.
+A Fabric mod for Minecraft **1.21.4** that shows web pages on walls, rendered through the **Android WebView** hosted by the launcher (the `webbridge.dex` bridge). It is built to be used on a phone (Mojo launcher and similar), not on a PC.
 
 > **Status: experimental.** It was built and tested step by step on a phone. Some parts (see [Limitations](#limitations)) are not finished yet.
 
@@ -21,20 +20,19 @@ A Fabric mod for Minecraft **1.21.6-1.21.8** that shows web pages on walls, rend
 
 | Component | Notes |
 |---|---|
-| Minecraft | 1.21.6-1.21.8 |
+| Minecraft | 1.21.4 |
 | Loader | Fabric Loader 0.16.0 or newer |
 | Java | 21 |
-| Fabric API | 0.136.1+ |
-| Launcher | MJ Extended with **WebView** (`webbridge.dex`) installed. Other Launcher Soon |
-| Mod Menu | Optional (adds a Configure button) |
+| Fabric API | 0.119.4+1.21.4 (or the matching build for 1.21.4) |
+| Launcher | An Android launcher with the **WebView bridge** (`webbridge.dex`) installed |
+| Mod Menu | Optional (adds a Configure button), 13.x for 1.21.4 |
+| Renderer | Vanilla OpenGL, or **VulkanMod** (only vanilla render calls are used) |
 
-Download Launcher  [Whatsapp Update](https://whatsapp.com/channel/0029Vb9d0rgFSAtB0FOyql1m).
-
-Without the WebView the mod still loads, but screens only show "Waiting for the Android WebView ...".
+Without the bridge the mod still loads, but screens only show "Waiting for the Android WebView bridge...".
 
 ## Installation
 
-1. Install Fabric Loader and **Fabric API**.
+1. Install Fabric Loader and **Fabric API** for 1.21.4.
 2. Put `webscreens-<version>.jar` (the one **without** the `-sources` suffix) in the `mods` folder.
 3. Make sure the launcher uses the latest `webbridge.dex` (built from the bridge repository).
 4. Start the game.
@@ -129,11 +127,13 @@ Local build: `./gradlew build` (JDK 21 or newer). The result is in `build/libs`.
 
 | Problem | Try |
 |---|---|
+| The screen only shows "Waiting for the Android WebView bridge..." | The launcher has not loaded `webbridge.dex`, or it is an old version. Install the latest dex. |
 | The screen flickers or stutters | Lower the resolution or FPS in the screen settings. Run `/webscreens stats` while looking at the screen. |
+| Video is black | Make sure the latest dex is installed (hardware capture path for video). |
 | Cannot create a screen on a server | Server without the mod: use `/webscreens place`. Server with the mod: use the Screen Placer item. |
-| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen `. This Feature Still Not Working |
+| A site's fullscreen button does nothing | Use the **Video full** button or `/webscreens fullscreen`. |
 
-When reporting a problem, include `latest.log` (the lines containing `WebScreens`) and the output of `/webscreens stats`.
+When reporting a problem, include `latest.log` (the lines containing `WebScreens` or `bridge`) and the output of `/webscreens stats`.
 
 ## Limitations
 
